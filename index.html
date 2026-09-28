@@ -45,20 +45,41 @@
       background: #fff;
     }
 
+    /*
+     * Loader tidak menutupi seluruh halaman.
+     * Hanya indikator kecil di bagian atas.
+     */
     .loader {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+
+      width: 30px;
+      height: 30px;
+
+      border: 3px solid #e5e5e5;
+      border-top-color: #d71920;
+      border-radius: 50%;
+
+      animation: spin 0.8s linear infinite;
+
+      z-index: 99999;
       background: #fff;
-      color: #666;
-      font-size: 14px;
-      z-index: 1;
     }
 
     .loader.hidden {
       display: none;
+    }
+
+    @keyframes spin {
+      from {
+        transform: translateX(-50%) rotate(0deg);
+      }
+
+      to {
+        transform: translateX(-50%) rotate(360deg);
+      }
     }
   </style>
 </head>
@@ -67,22 +88,28 @@
 
   <div class="iframe-container">
 
-    <div class="loader" id="loader">
-      Loading...
+    <div
+      class="loader"
+      id="loader"
+      aria-label="Loading">
     </div>
 
     <iframe
       id="appFrame"
+
       src="https://script.google.com/macros/s/AKfycbwB1crbgChpNwA86Njp7n-u13fin9OuPKUV9odnnZzRPmXkcQUNnWJXmfYJUH95QL7T/exec"
+
       title="PT Sukses Adi Surya"
 
-      <!--
-        Izinkan aplikasi di dalam iframe menggunakan:
-        - Geolocation
-        - Fullscreen
-        - Popup
-      -->
-      allow="geolocation; fullscreen; camera; microphone; payment"
+      allow="
+        geolocation;
+        fullscreen;
+        camera;
+        microphone;
+        payment;
+        clipboard-read;
+        clipboard-write
+      "
 
       allowfullscreen>
 
@@ -95,11 +122,226 @@
     const loader = document.getElementById("loader");
 
     /*
-     * Sembunyikan loader setelah iframe selesai dimuat.
+     * ============================================================
+     * 1. LOADING
+     * ============================================================
      */
+
     iframe.addEventListener("load", function () {
       loader.classList.add("hidden");
+
+      /*
+       * Setelah Web App selesai dimuat,
+       * coba kirim informasi lokasi jika tersedia.
+       */
+      requestLocation();
     });
+
+
+    /*
+     * ============================================================
+     * 2. REQUEST LOCATION
+     * ============================================================
+     *
+     * Lokasi diminta dari halaman wrapper.
+     *
+     * Ini penting karena iframe Google Apps Script dapat mengalami
+     * pembatasan permission geolocation.
+     */
+
+    function requestLocation() {
+
+      if (!navigator.geolocation) {
+        console.log("Browser tidak mendukung geolocation.");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+
+        function (position) {
+
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          const accuracy = position.coords.accuracy;
+
+          console.log("Lokasi berhasil diperoleh:");
+          console.log("Latitude:", latitude);
+          console.log("Longitude:", longitude);
+          console.log("Accuracy:", accuracy);
+
+          /*
+           * Kirim lokasi ke Web App.
+           */
+          sendLocationToApp(
+            latitude,
+            longitude,
+            accuracy
+          );
+        },
+
+        function (error) {
+
+          console.log(
+            "Gagal mendapatkan lokasi:",
+            error.code,
+            error.message
+          );
+
+        },
+
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0
+        }
+
+      );
+    }
+
+
+    /*
+     * ============================================================
+     * 3. KIRIM LOKASI KE IFRAME
+     * ============================================================
+     */
+
+    function sendLocationToApp(
+      latitude,
+      longitude,
+      accuracy
+    ) {
+
+      try {
+
+        iframe.contentWindow.postMessage(
+
+          {
+            type: "LOCATION_UPDATE",
+
+            latitude: latitude,
+            longitude: longitude,
+            accuracy: accuracy
+          },
+
+          "*"
+
+        );
+
+      } catch (error) {
+
+        console.error(
+          "Gagal mengirim lokasi ke Web App:",
+          error
+        );
+
+      }
+    }
+
+
+    /*
+     * ============================================================
+     * 4. MESSAGE DARI WEB APP
+     * ============================================================
+     *
+     * Web App dapat meminta lokasi ulang dengan mengirim:
+     *
+     * {
+     *   type: "REQUEST_LOCATION"
+     * }
+     */
+
+    window.addEventListener(
+      "message",
+      function (event) {
+
+        if (!event.data) {
+          return;
+        }
+
+        if (
+          event.data.type ===
+          "REQUEST_LOCATION"
+        ) {
+
+          requestLocation();
+
+        }
+
+      }
+    );
+
+
+    /*
+     * ============================================================
+     * 5. CONTACT / POPUP SUPPORT
+     * ============================================================
+     *
+     * Browser biasanya mengizinkan popup apabila dipanggil
+     * langsung dari event klik pengguna.
+     *
+     * Wrapper tidak melakukan reload atau mengubah session.
+     */
+
+    window.addEventListener(
+      "message",
+      function (event) {
+
+        if (!event.data) {
+          return;
+        }
+
+        /*
+         * Web App dapat meminta wrapper membuka URL Contact.
+         *
+         * Format:
+         *
+         * {
+         *   type: "OPEN_CONTACT",
+         *   url: "https://wa.me/628xxxxxxxxxx"
+         * }
+         */
+
+        if (
+          event.data.type ===
+          "OPEN_CONTACT"
+        ) {
+
+          const url = event.data.url;
+
+          if (!url) {
+            return;
+          }
+
+          /*
+           * Buka URL pada tab baru.
+           */
+          window.open(
+            url,
+            "_blank",
+            "noopener,noreferrer"
+          );
+        }
+
+      }
+    );
+
+
+    /*
+     * ============================================================
+     * 6. JANGAN RELOAD WEB APP
+     * ============================================================
+     *
+     * Tidak menggunakan:
+     *
+     * location.reload()
+     * location.href
+     * localStorage
+     * sessionStorage
+     * cookie manipulation
+     *
+     * Session/login tetap ditangani Google Apps Script.
+     */
+
   </script>
 
 </body>
