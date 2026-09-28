@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
   <meta charset="UTF-8">
 
   <meta
@@ -12,980 +10,99 @@
 
   <title>PT Sukses Adi Surya</title>
 
-  <!-- FAVICON -->
-  <link
-    rel="icon"
-    type="image/x-icon"
-    href="favicon.ico"
-  >
-
-  <link
-    rel="shortcut icon"
-    type="image/x-icon"
-    href="favicon.ico"
-  >
-
+  <!-- Favicon Castrol -->
+  <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
 
   <style>
-
     html,
     body {
-
       margin: 0;
       padding: 0;
-
       width: 100%;
       height: 100%;
-
       overflow: hidden;
-
       background: #fff;
-
       font-family: Arial, sans-serif;
-
     }
-
 
     .iframe-container {
-
       position: fixed;
-
       inset: 0;
-
       width: 100%;
       height: 100%;
-
       overflow: hidden;
-
       background: #fff;
-
     }
-
 
     iframe {
-
       display: block;
-
       width: 100%;
       height: 100%;
-
       border: 0;
-
       margin: 0;
       padding: 0;
-
       background: #fff;
-
     }
-
-
-    /* ============================================================
-       LOADING
-       ============================================================ */
 
     .loader {
-
-      position: fixed;
-
-      top: 10px;
-      left: 50%;
-
-      transform: translateX(-50%);
-
-      width: 30px;
-      height: 30px;
-
-      border: 3px solid #e5e5e5;
-
-      border-top-color: #d71920;
-
-      border-radius: 50%;
-
-      animation:
-        spin 0.8s linear infinite;
-
-      z-index: 99999;
-
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: #fff;
-
+      color: #666;
+      font-size: 14px;
+      z-index: 1;
     }
-
 
     .loader.hidden {
-
       display: none;
-
     }
-
-
-    @keyframes spin {
-
-      from {
-
-        transform:
-          translateX(-50%)
-          rotate(0deg);
-
-      }
-
-      to {
-
-        transform:
-          translateX(-50%)
-          rotate(360deg);
-
-      }
-
-    }
-
-
-    /* ============================================================
-       TOMBOL PILIH KONTAK
-       ============================================================ */
-
-    #contactButton {
-
-      position: fixed;
-
-      right: 15px;
-      bottom: 15px;
-
-      z-index: 999999;
-
-      display: none;
-
-      border: none;
-
-      border-radius: 10px;
-
-      padding: 12px 18px;
-
-      background: #d71920;
-
-      color: #fff;
-
-      font-size: 14px;
-
-      font-weight: bold;
-
-      cursor: pointer;
-
-      box-shadow:
-        0 4px 15px rgba(0, 0, 0, 0.20);
-
-    }
-
-
-    #contactButton:active {
-
-      transform: scale(0.97);
-
-    }
-
-
-    /* ============================================================
-       PESAN
-       ============================================================ */
-
-    #contactMessage {
-
-      position: fixed;
-
-      left: 15px;
-      right: 15px;
-
-      bottom: 75px;
-
-      z-index: 1000000;
-
-      display: none;
-
-      padding: 12px;
-
-      border-radius: 8px;
-
-      background: #fff3cd;
-
-      color: #664d03;
-
-      font-size: 13px;
-
-      text-align: center;
-
-      box-shadow:
-        0 3px 12px rgba(0, 0, 0, 0.15);
-
-    }
-
   </style>
-
 </head>
-
 
 <body>
 
-
-  <!-- ============================================================
-       GOOGLE APPS SCRIPT
-       ============================================================ -->
-
   <div class="iframe-container">
 
-    <div
-      class="loader"
-      id="loader"
-      aria-label="Loading">
+    <div class="loader" id="loader">
+      Loading...
     </div>
-
 
     <iframe
       id="appFrame"
-
-      src="https://script.google.com/macros/s/AKfycbwB1crbgChpNwA86Njp7n-u13fin9OuPKUV9odnnZzRPmXkcQUNnWJXmfYJUH95QL7T/exec"
-
-      title="PT Sukses Adi Surya"
-
-      allow="
-        geolocation;
-        fullscreen;
-        camera;
-        microphone;
-        payment;
-        clipboard-read;
-        clipboard-write
-      "
-
+      src="https://script.google.com/macros/s/AKfycbze5jLKiHVtoahf4Ea_svGf2-u4YlBC7nGXiBowAhxA_ve7_uIcrHFJrMLgWw4I8OoLEw/exec"
+      title="Castrol"
+      allow="fullscreen"
       allowfullscreen>
-
     </iframe>
 
   </div>
 
-
-  <!-- ============================================================
-       TOMBOL KONTAK
-       Tombol ini berada di TOP FRAME.
-       ============================================================ -->
-
-  <button
-    type="button"
-    id="contactButton">
-
-    Pilih Kontak HP
-
-  </button>
-
-
-  <div id="contactMessage"></div>
-
-
-
   <script>
+    const iframe = document.getElementById("appFrame");
+    const loader = document.getElementById("loader");
 
     /*
-     * ============================================================
-     * ELEMENT
-     * ============================================================
-     */
-
-    const iframe =
-      document.getElementById("appFrame");
-
-    const loader =
-      document.getElementById("loader");
-
-    const contactButton =
-      document.getElementById("contactButton");
-
-    const contactMessage =
-      document.getElementById("contactMessage");
-
-
-
-    /*
-     * ============================================================
-     * WEB APP LOAD
-     * ============================================================
-     */
-
-    iframe.addEventListener(
-      "load",
-      function () {
-
-        loader.classList.add("hidden");
-
-        /*
-         * Request lokasi setelah Web App selesai dimuat.
-         */
-
-        requestLocation();
-
-      }
-    );
-
-
-
-    /*
-     * ============================================================
-     * GEOLOCATION
-     * ============================================================
-     */
-
-    function requestLocation() {
-
-      if (!navigator.geolocation) {
-
-        console.log(
-          "Browser tidak mendukung geolocation."
-        );
-
-        return;
-
-      }
-
-
-      navigator.geolocation.getCurrentPosition(
-
-        function (position) {
-
-          const latitude =
-            position.coords.latitude;
-
-          const longitude =
-            position.coords.longitude;
-
-          const accuracy =
-            position.coords.accuracy;
-
-
-          sendLocationToApp(
-            latitude,
-            longitude,
-            accuracy
-          );
-
-        },
-
-
-        function (error) {
-
-          console.log(
-            "Gagal mendapatkan lokasi:",
-            error.code,
-            error.message
-          );
-
-        },
-
-
-        {
-
-          enableHighAccuracy: true,
-
-          timeout: 15000,
-
-          maximumAge: 0
-
-        }
-
-      );
-
-    }
-
-
-
-    /*
-     * ============================================================
-     * KIRIM LOKASI KE GOOGLE APPS SCRIPT
-     * ============================================================
-     */
-
-    function sendLocationToApp(
-      latitude,
-      longitude,
-      accuracy
-    ) {
-
-      try {
-
-        iframe.contentWindow.postMessage(
-
-          {
-
-            type:
-              "LOCATION_UPDATE",
-
-            latitude:
-              latitude,
-
-            longitude:
-              longitude,
-
-            accuracy:
-              accuracy
-
-          },
-
-          "*"
-
-        );
-
-      }
-
-      catch (error) {
-
-        console.error(
-          "Gagal mengirim lokasi:",
-          error
-        );
-
-      }
-
-    }
-
-
-
-    /*
-     * ============================================================
-     * CONTACT PICKER
+     * Hanya menyembunyikan loader setelah iframe selesai.
      *
-     * PENTING:
+     * Tidak ada:
+     * - reload()
+     * - location.href
+     * - localStorage
+     * - sessionStorage
+     * - cookie manipulation
+     * - postMessage
      *
-     * Fungsi ini berada di TOP FRAME.
-     *
-     * JANGAN dipindahkan ke dalam iframe.
-     *
-     * navigator.contacts.select()
-     * hanya dipanggil di sini.
-     * ============================================================
+     * sehingga session/login Web App tetap ditangani
+     * sepenuhnya oleh Google Apps Script.
      */
-
-    async function pilihKontakHP() {
-
-      console.log(
-        "Mencoba membuka Contact Picker..."
-      );
-
-
-      /*
-       * Pastikan kita benar-benar TOP FRAME.
-       */
-
-      if (window.top !== window.self) {
-
-        console.error(
-          "Contact Picker harus dijalankan di top frame."
-        );
-
-        tampilkanPesan(
-          "Contact Picker harus dijalankan dari halaman utama."
-        );
-
-        return;
-
-      }
-
-
-      /*
-       * Cek dukungan Contacts API.
-       */
-
-      if (
-        !navigator.contacts ||
-        !navigator.contacts.select
-      ) {
-
-        console.log(
-          "Contacts API tidak tersedia."
-        );
-
-        tampilkanPesan(
-          "HP/browser ini tidak mendukung pemilihan kontak langsung."
-        );
-
-        return;
-
-      }
-
-
-      try {
-
-        /*
-         * ========================================================
-         * BUKA KONTAK HP
-         * ========================================================
-         */
-
-        const contacts =
-          await navigator.contacts.select(
-
-            [
-              "name",
-              "tel"
-            ],
-
-            {
-              multiple: false
-            }
-
-          );
-
-
-        /*
-         * User tidak memilih kontak.
-         */
-
-        if (
-          !contacts ||
-          contacts.length === 0
-        ) {
-
-          return;
-
-        }
-
-
-        const contact =
-          contacts[0];
-
-
-        /*
-         * ========================================================
-         * NAMA
-         * ========================================================
-         */
-
-        let nama = "";
-
-
-        if (
-          Array.isArray(contact.name) &&
-          contact.name.length > 0
-        ) {
-
-          nama =
-            contact.name[0] || "";
-
-        }
-
-
-        /*
-         * ========================================================
-         * NOMOR TELEPON
-         * ========================================================
-         */
-
-        let nomor = "";
-
-
-        if (
-          Array.isArray(contact.tel) &&
-          contact.tel.length > 0
-        ) {
-
-          nomor =
-            contact.tel[0] || "";
-
-        }
-
-
-        /*
-         * Bersihkan data.
-         */
-
-        nama =
-          String(nama).trim();
-
-        nomor =
-          String(nomor).trim();
-
-
-        console.log(
-          "Kontak dipilih:",
-          nama,
-          nomor
-        );
-
-
-        /*
-         * ========================================================
-         * KIRIM KE GOOGLE APPS SCRIPT
-         * ========================================================
-         */
-
-        kirimKontakKeApp(
-          nama,
-          nomor
-        );
-
-
-      }
-
-      catch (error) {
-
-        console.error(
-          "Contact Picker gagal:",
-          error
-        );
-
-
-        /*
-         * Jangan tampilkan error teknis panjang
-         * kepada user.
-         */
-
-        if (
-          error &&
-          error.name ===
-          "AbortError"
-        ) {
-
-          /*
-           * User membatalkan picker.
-           */
-
-          return;
-
-        }
-
-
-        tampilkanPesan(
-          "Kontak tidak dapat diakses. Silakan coba lagi."
-        );
-
-      }
-
-    }
-
-
-
-    /*
-     * ============================================================
-     * KIRIM KONTAK KE IFRAME
-     * ============================================================
-     */
-
-    function kirimKontakKeApp(
-      nama,
-      nomor
-    ) {
-
-      try {
-
-        /*
-         * Format utama.
-         */
-
-        iframe.contentWindow.postMessage(
-
-          {
-
-            type:
-              "CONTACT_SELECTED",
-
-            name:
-              nama,
-
-            phone:
-              nomor
-
-          },
-
-          "*"
-
-        );
-
-
-        /*
-         * Format alternatif
-         * untuk kompatibilitas kode lama.
-         */
-
-        iframe.contentWindow.postMessage(
-
-          {
-
-            type:
-              "PHONE_CONTACT_SELECTED",
-
-            nama:
-              nama,
-
-            nomor:
-              nomor
-
-          },
-
-          "*"
-
-        );
-
-
-        console.log(
-          "Kontak berhasil dikirim ke Web App."
-        );
-
-
-      }
-
-      catch (error) {
-
-        console.error(
-          "Gagal mengirim kontak:",
-          error
-        );
-
-      }
-
-    }
-
-
-
-    /*
-     * ============================================================
-     * PESAN
-     * ============================================================
-     */
-
-    function tampilkanPesan(
-      message
-    ) {
-
-      contactMessage.textContent =
-        message;
-
-
-      contactMessage.style.display =
-        "block";
-
-
-      setTimeout(
-
-        function () {
-
-          contactMessage.style.display =
-            "none";
-
-        },
-
-        5000
-
-      );
-
-    }
-
-
-
-    /*
-     * ============================================================
-     * TOMBOL KONTAK
-     * ============================================================
-     *
-     * Tombol ini dibuat di TOP FRAME.
-     *
-     * Karena Contact Picker membutuhkan user gesture,
-     * pemanggilan select() dilakukan langsung dari click.
-     * ============================================================
-     */
-
-    contactButton.addEventListener(
-
-      "click",
-
-      function () {
-
-        pilihKontakHP();
-
-      }
-
-    );
-
-
-
-    /*
-     * ============================================================
-     * MESSAGE DARI GOOGLE APPS SCRIPT
-     * ============================================================
-     */
-
-    window.addEventListener(
-
-      "message",
-
-      function (event) {
-
-        if (!event.data) {
-
-          return;
-
-        }
-
-
-        const data =
-          event.data;
-
-
-        /*
-         * ========================================================
-         * REQUEST LOCATION
-         * ========================================================
-         */
-
-        if (
-          data.type ===
-          "REQUEST_LOCATION"
-        ) {
-
-          requestLocation();
-
-          return;
-
-        }
-
-
-        /*
-         * ========================================================
-         * REQUEST CONTACT
-         * ========================================================
-         *
-         * Google Apps Script mengirim:
-         *
-         * {
-         *   type: "REQUEST_CONTACT"
-         * }
-         *
-         * Wrapper kemudian membuka kontak HP.
-         * ========================================================
-         */
-
-        if (
-          data.type ===
-          "REQUEST_CONTACT"
-        ) {
-
-          /*
-           * Panggil fungsi TOP FRAME.
-           */
-
-          pilihKontakHP();
-
-          return;
-
-        }
-
-
-        /*
-         * ========================================================
-         * TAMPILKAN TOMBOL KONTAK
-         * ========================================================
-         */
-
-        if (
-          data.type ===
-          "SHOW_CONTACT_BUTTON"
-        ) {
-
-          contactButton.style.display =
-            "block";
-
-          return;
-
-        }
-
-
-        /*
-         * ========================================================
-         * SEMBUNYIKAN TOMBOL KONTAK
-         * ========================================================
-         */
-
-        if (
-          data.type ===
-          "HIDE_CONTACT_BUTTON"
-        ) {
-
-          contactButton.style.display =
-            "none";
-
-          return;
-
-        }
-
-
-        /*
-         * ========================================================
-         * OPEN CONTACT / WHATSAPP
-         * ========================================================
-         */
-
-        if (
-          data.type ===
-          "OPEN_CONTACT"
-        ) {
-
-          const url =
-            data.url;
-
-
-          if (!url) {
-
-            return;
-
-          }
-
-
-          window.open(
-            url,
-            "_blank",
-            "noopener,noreferrer"
-          );
-
-          return;
-
-        }
-
-      }
-
-    );
-
-
-
-    /*
-     * ============================================================
-     * CEK CONTACT PICKER
-     * ============================================================
-     */
-
-    function cekContactPicker() {
-
-      const tersedia =
-        !!(
-          navigator.contacts &&
-          navigator.contacts.select
-        );
-
-
-      console.log(
-        "Contact Picker tersedia:",
-        tersedia
-      );
-
-
-      return tersedia;
-
-    }
-
-
-    /*
-     * Jalankan pengecekan.
-     */
-
-    cekContactPicker();
-
-
+    iframe.addEventListener("load", function () {
+      loader.classList.add("hidden");
+    });
   </script>
 
-
 </body>
-
 </html>
