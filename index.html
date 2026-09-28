@@ -25,6 +25,7 @@
     href="favicon.ico"
   >
 
+
   <style>
 
     html,
@@ -139,7 +140,7 @@
 
 
     /* ============================================================
-       TOMBOL KONTAK
+       TOMBOL PILIH KONTAK
        ============================================================ */
 
     #contactButton {
@@ -149,15 +150,15 @@
       right: 15px;
       bottom: 15px;
 
-      z-index: 100000;
+      z-index: 999999;
 
       display: none;
 
-      border: 0;
+      border: none;
 
       border-radius: 10px;
 
-      padding: 12px 16px;
+      padding: 12px 18px;
 
       background: #d71920;
 
@@ -170,7 +171,7 @@
       cursor: pointer;
 
       box-shadow:
-        0 3px 12px rgba(0, 0, 0, 0.2);
+        0 4px 15px rgba(0, 0, 0, 0.20);
 
     }
 
@@ -183,7 +184,7 @@
 
 
     /* ============================================================
-       PESAN BROWSER TIDAK SUPPORT
+       PESAN
        ============================================================ */
 
     #contactMessage {
@@ -195,7 +196,7 @@
 
       bottom: 75px;
 
-      z-index: 100001;
+      z-index: 1000000;
 
       display: none;
 
@@ -212,7 +213,7 @@
       text-align: center;
 
       box-shadow:
-        0 2px 10px rgba(0, 0, 0, 0.15);
+        0 3px 12px rgba(0, 0, 0, 0.15);
 
     }
 
@@ -224,10 +225,11 @@
 <body>
 
 
+  <!-- ============================================================
+       GOOGLE APPS SCRIPT
+       ============================================================ -->
+
   <div class="iframe-container">
-
-
-    <!-- LOADING -->
 
     <div
       class="loader"
@@ -235,8 +237,6 @@
       aria-label="Loading">
     </div>
 
-
-    <!-- GOOGLE APPS SCRIPT -->
 
     <iframe
       id="appFrame"
@@ -259,12 +259,12 @@
 
     </iframe>
 
-
   </div>
 
 
   <!-- ============================================================
-       TOMBOL KONTAK HP
+       TOMBOL KONTAK
+       Tombol ini berada di TOP FRAME.
        ============================================================ -->
 
   <button
@@ -279,11 +279,12 @@
   <div id="contactMessage"></div>
 
 
+
   <script>
 
     /*
      * ============================================================
-     * KONFIGURASI
+     * ELEMENT
      * ============================================================
      */
 
@@ -300,9 +301,10 @@
       document.getElementById("contactMessage");
 
 
+
     /*
      * ============================================================
-     * 1. WEB APP SELESAI DIMUAT
+     * WEB APP LOAD
      * ============================================================
      */
 
@@ -313,7 +315,7 @@
         loader.classList.add("hidden");
 
         /*
-         * Minta lokasi setelah Web App selesai dimuat.
+         * Request lokasi setelah Web App selesai dimuat.
          */
 
         requestLocation();
@@ -322,9 +324,10 @@
     );
 
 
+
     /*
      * ============================================================
-     * 2. REQUEST LOCATION
+     * GEOLOCATION
      * ============================================================
      */
 
@@ -353,11 +356,6 @@
 
           const accuracy =
             position.coords.accuracy;
-
-
-          console.log(
-            "Lokasi berhasil diperoleh."
-          );
 
 
           sendLocationToApp(
@@ -395,9 +393,10 @@
     }
 
 
+
     /*
      * ============================================================
-     * 3. KIRIM LOKASI KE GOOGLE APPS SCRIPT
+     * KIRIM LOKASI KE GOOGLE APPS SCRIPT
      * ============================================================
      */
 
@@ -445,21 +444,50 @@
     }
 
 
+
     /*
      * ============================================================
-     * 4. CONTACT PICKER API
-     * ============================================================
+     * CONTACT PICKER
      *
-     * Fungsi ini digunakan pada HP yang mendukung:
+     * PENTING:
+     *
+     * Fungsi ini berada di TOP FRAME.
+     *
+     * JANGAN dipindahkan ke dalam iframe.
      *
      * navigator.contacts.select()
-     *
+     * hanya dipanggil di sini.
+     * ============================================================
      */
 
     async function pilihKontakHP() {
 
+      console.log(
+        "Mencoba membuka Contact Picker..."
+      );
+
+
       /*
-       * Cek dukungan browser.
+       * Pastikan kita benar-benar TOP FRAME.
+       */
+
+      if (window.top !== window.self) {
+
+        console.error(
+          "Contact Picker harus dijalankan di top frame."
+        );
+
+        tampilkanPesan(
+          "Contact Picker harus dijalankan dari halaman utama."
+        );
+
+        return;
+
+      }
+
+
+      /*
+       * Cek dukungan Contacts API.
        */
 
       if (
@@ -467,9 +495,12 @@
         !navigator.contacts.select
       ) {
 
-        showContactMessage(
-          "Browser HP ini tidak mendukung akses kontak langsung. " +
-          "Silakan gunakan browser yang mendukung Contact Picker."
+        console.log(
+          "Contacts API tidak tersedia."
+        );
+
+        tampilkanPesan(
+          "HP/browser ini tidak mendukung pemilihan kontak langsung."
         );
 
         return;
@@ -480,9 +511,9 @@
       try {
 
         /*
-         * Buka daftar kontak HP.
-         *
-         * User sendiri yang memilih kontak.
+         * ========================================================
+         * BUKA KONTAK HP
+         * ========================================================
          */
 
         const contacts =
@@ -501,7 +532,7 @@
 
 
         /*
-         * Tidak ada kontak dipilih.
+         * User tidak memilih kontak.
          */
 
         if (
@@ -519,37 +550,54 @@
 
 
         /*
-         * Ambil nama.
+         * ========================================================
+         * NAMA
+         * ========================================================
          */
 
         let nama = "";
 
+
         if (
-          contact.name &&
+          Array.isArray(contact.name) &&
           contact.name.length > 0
         ) {
 
           nama =
-            contact.name[0];
+            contact.name[0] || "";
 
         }
 
 
         /*
-         * Ambil nomor telepon.
+         * ========================================================
+         * NOMOR TELEPON
+         * ========================================================
          */
 
         let nomor = "";
 
+
         if (
-          contact.tel &&
+          Array.isArray(contact.tel) &&
           contact.tel.length > 0
         ) {
 
           nomor =
-            contact.tel[0];
+            contact.tel[0] || "";
 
         }
+
+
+        /*
+         * Bersihkan data.
+         */
+
+        nama =
+          String(nama).trim();
+
+        nomor =
+          String(nomor).trim();
 
 
         console.log(
@@ -560,26 +608,49 @@
 
 
         /*
-         * Kirim data kontak ke Google Apps Script.
+         * ========================================================
+         * KIRIM KE GOOGLE APPS SCRIPT
+         * ========================================================
          */
 
-        sendContactToApp(
+        kirimKontakKeApp(
           nama,
           nomor
         );
+
 
       }
 
       catch (error) {
 
         console.error(
-          "Gagal mengakses kontak:",
+          "Contact Picker gagal:",
           error
         );
 
 
-        showContactMessage(
-          "Akses kontak dibatalkan atau tidak diizinkan."
+        /*
+         * Jangan tampilkan error teknis panjang
+         * kepada user.
+         */
+
+        if (
+          error &&
+          error.name ===
+          "AbortError"
+        ) {
+
+          /*
+           * User membatalkan picker.
+           */
+
+          return;
+
+        }
+
+
+        tampilkanPesan(
+          "Kontak tidak dapat diakses. Silakan coba lagi."
         );
 
       }
@@ -587,18 +658,23 @@
     }
 
 
+
     /*
      * ============================================================
-     * 5. KIRIM KONTAK KE WEB APP
+     * KIRIM KONTAK KE IFRAME
      * ============================================================
      */
 
-    function sendContactToApp(
+    function kirimKontakKeApp(
       nama,
       nomor
     ) {
 
       try {
+
+        /*
+         * Format utama.
+         */
 
         iframe.contentWindow.postMessage(
 
@@ -621,7 +697,8 @@
 
 
         /*
-         * Juga kirim event alternatif.
+         * Format alternatif
+         * untuk kompatibilitas kode lama.
          */
 
         iframe.contentWindow.postMessage(
@@ -645,10 +722,9 @@
 
 
         console.log(
-          "Kontak dikirim ke Web App:",
-          nama,
-          nomor
+          "Kontak berhasil dikirim ke Web App."
         );
+
 
       }
 
@@ -664,13 +740,14 @@
     }
 
 
+
     /*
      * ============================================================
-     * 6. PESAN CONTACT PICKER
+     * PESAN
      * ============================================================
      */
 
-    function showContactMessage(
+    function tampilkanPesan(
       message
     ) {
 
@@ -698,9 +775,16 @@
     }
 
 
+
     /*
      * ============================================================
-     * 7. TOMBOL KONTAK
+     * TOMBOL KONTAK
+     * ============================================================
+     *
+     * Tombol ini dibuat di TOP FRAME.
+     *
+     * Karena Contact Picker membutuhkan user gesture,
+     * pemanggilan select() dilakukan langsung dari click.
      * ============================================================
      */
 
@@ -717,9 +801,10 @@
     );
 
 
+
     /*
      * ============================================================
-     * 8. MESSAGE DARI GOOGLE APPS SCRIPT
+     * MESSAGE DARI GOOGLE APPS SCRIPT
      * ============================================================
      */
 
@@ -736,95 +821,110 @@
         }
 
 
+        const data =
+          event.data;
+
+
         /*
-         * --------------------------------------------------------
+         * ========================================================
          * REQUEST LOCATION
-         * --------------------------------------------------------
+         * ========================================================
          */
 
         if (
-          event.data.type ===
+          data.type ===
           "REQUEST_LOCATION"
         ) {
 
           requestLocation();
 
+          return;
+
         }
 
 
         /*
-         * --------------------------------------------------------
+         * ========================================================
          * REQUEST CONTACT
-         * --------------------------------------------------------
+         * ========================================================
          *
-         * Web App dapat mengirim:
+         * Google Apps Script mengirim:
          *
          * {
          *   type: "REQUEST_CONTACT"
          * }
          *
-         * untuk meminta wrapper membuka Contact Picker.
+         * Wrapper kemudian membuka kontak HP.
+         * ========================================================
          */
 
         if (
-          event.data.type ===
+          data.type ===
           "REQUEST_CONTACT"
         ) {
 
+          /*
+           * Panggil fungsi TOP FRAME.
+           */
+
           pilihKontakHP();
+
+          return;
 
         }
 
 
         /*
-         * --------------------------------------------------------
-         * SHOW CONTACT BUTTON
-         * --------------------------------------------------------
-         *
-         * Web App dapat meminta tombol kontak ditampilkan.
+         * ========================================================
+         * TAMPILKAN TOMBOL KONTAK
+         * ========================================================
          */
 
         if (
-          event.data.type ===
+          data.type ===
           "SHOW_CONTACT_BUTTON"
         ) {
 
           contactButton.style.display =
             "block";
 
+          return;
+
         }
 
 
         /*
-         * --------------------------------------------------------
-         * HIDE CONTACT BUTTON
-         * --------------------------------------------------------
+         * ========================================================
+         * SEMBUNYIKAN TOMBOL KONTAK
+         * ========================================================
          */
 
         if (
-          event.data.type ===
+          data.type ===
           "HIDE_CONTACT_BUTTON"
         ) {
 
           contactButton.style.display =
             "none";
 
+          return;
+
         }
 
 
         /*
-         * --------------------------------------------------------
+         * ========================================================
          * OPEN CONTACT / WHATSAPP
-         * --------------------------------------------------------
+         * ========================================================
          */
 
         if (
-          event.data.type ===
+          data.type ===
           "OPEN_CONTACT"
         ) {
 
           const url =
-            event.data.url;
+            data.url;
 
 
           if (!url) {
@@ -840,6 +940,8 @@
             "noopener,noreferrer"
           );
 
+          return;
+
         }
 
       }
@@ -847,42 +949,38 @@
     );
 
 
+
     /*
      * ============================================================
-     * 9. DETEKSI CONTACT PICKER
+     * CEK CONTACT PICKER
      * ============================================================
      */
 
-    function checkContactSupport() {
+    function cekContactPicker() {
 
-      if (
-        navigator.contacts &&
-        navigator.contacts.select
-      ) {
-
-        console.log(
-          "Contact Picker API tersedia."
+      const tersedia =
+        !!(
+          navigator.contacts &&
+          navigator.contacts.select
         );
-
-        return true;
-
-      }
 
 
       console.log(
-        "Contact Picker API tidak tersedia."
+        "Contact Picker tersedia:",
+        tersedia
       );
 
-      return false;
+
+      return tersedia;
 
     }
 
 
     /*
-     * Jalankan pengecekan saat halaman dibuka.
+     * Jalankan pengecekan.
      */
 
-    checkContactSupport();
+    cekContactPicker();
 
 
   </script>
