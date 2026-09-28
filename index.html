@@ -1,48 +1,111 @@
+```html
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JNC Edukasi</title>
-  <link rel="icon" href="https://static.vecteezy.com/system/resources/previews/016/716/181/large_2x/website-3d-icon-png.png" type="image/x-icon">
+  <meta charset="UTF-8">
+
+  <!-- Penting untuk tampilan HP -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+  <title>Castrol Outlet</title>
+
+  <link
+    rel="icon"
+    href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjbF9zjGOOADFZIb2DyNfdj-3wi3z5cqLroA&s"
+    type="image/x-icon"
+  >
+
   <style>
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
+      width: 100%;
       height: 100%;
       overflow: hidden;
-      font-family: sans-serif;
+      background: #fff;
+      font-family: Arial, sans-serif;
     }
+
     .iframe-container {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-    }
-    iframe {
+      position: fixed;
+      inset: 0;
       width: 100%;
       height: 100%;
-      border: none;
+      overflow: hidden;
+      background: #fff;
     }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+    }
+
+    /* Loader hanya tampil sebelum iframe selesai dimuat */
     .loader {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 1.2rem;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
       color: #666;
-      z-index: 10;
+      font-size: 14px;
+      z-index: 1;
+    }
+
+    .loader.hidden {
+      display: none;
     }
   </style>
 </head>
+
 <body>
+
   <div class="iframe-container">
-    <div class="loader" id="loader">Loading app...</div>
-    <iframe 
-      src="https://script.google.com/macros/s/AKfycbwZHD6DhhUjweqk8CgIrj81hMQOZOp2glKfa0C8hkpOsMdxwT8X8EDSTkcTUiY6oOzZ/exec" 
-      title="JNCfy Web App"
-      onload="document.getElementById('loader').style.display='none';"
+
+    <div class="loader" id="loader">
+      Loading...
+    </div>
+
+    <iframe
+      id="appFrame"
+      src="https://script.google.com/macros/s/AKfycbwZHD6DhhUjweqk8CgIrj81hMQOZOp2glKfa0C8hkpOsMdxwT8X8EDSTkcTUiY6oOzZ/exec"
+      title="JNC Edukasi"
+      allow="fullscreen"
       allowfullscreen>
     </iframe>
+
   </div>
+
+  <script>
+    const iframe = document.getElementById("appFrame");
+    const loader = document.getElementById("loader");
+
+    /*
+     * Hanya menyembunyikan loader setelah iframe selesai.
+     *
+     * Tidak ada:
+     * - reload()
+     * - location.href
+     * - localStorage
+     * - sessionStorage
+     * - cookie manipulation
+     * - postMessage
+     *
+     * sehingga session/login Web App tetap ditangani
+     * sepenuhnya oleh Google Apps Script.
+     */
+    iframe.addEventListener("load", function () {
+      loader.classList.add("hidden");
+    });
+  </script>
+
 </body>
 </html>
+```
